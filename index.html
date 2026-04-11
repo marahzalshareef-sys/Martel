@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>لعبة مهاراتي اليومية</title>
+    
+    <style>
+        /* إعدادات عامة */
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Comic Sans MS', 'Arial', sans-serif; }
+        body { overflow: hidden; background-color: #ffffff; touch-action: none; }
+
+        /* إعدادات الشاشات */
+        .screen { width: 100vw; height: 100vh; position: absolute; top: 0; left: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background-size: cover; background-position: center; transition: opacity 0.5s; z-index: 1;}
+        .hidden { display: none !important; }
+        .active { display: flex; }
+
+        /* طبقة شفافة للخلفيات */
+        .bg-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; opacity: 0.1; background-size: cover; background-position: center; z-index: -1; pointer-events: none; }
+
+        /* الشاشة 3 (الغرف) */
+        #screen-rooms { position: relative; background-color: #ffffff; }
+        #screen-rooms .bg-overlay { background-image: url('bg.jpg'); }
+
+        /* الخلفيات الأساسية (لابتوب) */
+        .home-bg { background-image: url('bglaptop1.jpg'); }
+        .welcome-bg { background-image: url('bglaptop2.jpg'); }
+
+        /* الأزرار النصية */
+        .text-btn { cursor: pointer; border: none; border-radius: 20px; font-size: 28px; font-weight: bold; padding: 15px 50px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); transition: transform 0.2s; margin-top: 20px;}
+        .text-btn:active { transform: scale(0.95); }
+        .btn-primary { background-color: #FF4500; color: white; border: 5px solid #FFD700; }
+        .btn-secondary { background-color: #32CD32; color: white; border: 5px solid #006400; }
+
+        /* أزرار الأيقونات الجانبية */
+        .icon-btn { width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; cursor: pointer; box-shadow: 0 4px 8px rgba(0,0,0,0.3); border: 4px solid white; transition: transform 0.2s; text-decoration: none;}
+        .icon-btn:active { transform: scale(0.9); }
+        .icon-music { background-color: #2196F3; }
+        .icon-home { background-color: #4CAF50; }
+        .icon-back { background-color: #FF9800; }
+        .icon-rooms { background-color: #00BCD4; }
+        
+        /* أزرار التحكم داخل اللعبة */
+        .game-ctrl-btn { width: 55px; height: 55px; font-size: 25px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 8px rgba(0,0,0,0.3); border: 4px solid white; transition: transform 0.2s; }
+        .game-ctrl-btn:active { transform: scale(0.9); }
+        .icon-retry { background-color: #9C27B0; }
+        .icon-next { background-color: #E91E63; }
+
+        /* حاوية أزرار التحكم الجانبية */
+        #controls { position: absolute; top: 20px; right: 20px; z-index: 100; display: flex; flex-direction: column; gap: 15px; }
+
+        /* العناوين والتصميم الداخلي */
+        .header-bar { display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 45px; } 
+        .title { background-color: rgba(255, 255, 255, 0.9); padding: 15px 40px; border-radius: 20px; border: 3px dashed #333; font-size: 32px; color: #333;}
+        #room-title { margin-bottom: 45px; } 
+
+        /* البطاقات للحاسوب */
+        .rooms-container, .activities-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 25px; max-width: 95%; }
+        .card { background-color: white; padding: 20px; border-radius: 20px; text-align: center; cursor: pointer; box-shadow: 0 4px 8px rgba(0,0,0,0.2); border: 5px solid white; transition: transform 0.3s; width: 210px; }
+        .card:hover { transform: scale(1.05); }
+        .card img { width: 100%; height: 140px; object-fit: contain; border-radius: 10px; } 
+        .card h3 { margin-top: 15px; font-size: 22px; color: #333; }
+
+        /* منطقة الترتيب للحاسوب */
+        .zones-container, .images-container { display: flex; gap: 20px; margin: 20px; justify-content: center; flex-wrap: wrap; }
+        .drop-zone { width: 140px; height: 140px; border: 4px dashed #666; border-radius: 15px; display: flex; align-items: center; justify-content: center; font-size: 35px; color: #666; background-color: rgba(255,255,255,0.7); transition: background-color 0.3s; }
+        .drop-zone img { width: 100%; height: 100%; border-radius: 10px; object-fit: cover; }
+        
+        .draggable-img { width: 140px; height: 140px; object-fit: cover; border-radius: 15px; cursor: grab; border: 4px solid white; box-shadow: 0 4px 8px rgba(0,0,0,0.2); touch-action: none; background-color: white;}
+        .draggable-img:active { cursor: grabbing; }
+
+        /* ================= تعديلات الجوال ================= */
+        @media (max-width: 768px) {
+            .home-bg { background-image: url('bgphone2.jpg'); }
+            .welcome-bg { background-image: url('bgphone1.jpg'); }
+            #screen-rooms .bg-overlay { background-image: url('bgk.jpg'); }
+
+            .card { width: 130px; padding: 10px; border-width: 3px;}
+            .card img { height: 90px; }
+            .card h3 { font-size: 16px; margin-top: 10px; }
+            .rooms-container, .activities-container { gap: 15px; }
+
+            .drop-zone { width: 80px; height: 80px; font-size: 24px; border-width: 3px; border-radius: 10px;}
+            .draggable-img { width: 80px; height: 80px; border-width: 3px; border-radius: 10px;}
+            .zones-container, .images-container { gap: 10px; margin: 15px; }
+
+            .title { font-size: 20px; padding: 10px 20px; border-width: 2px;}
+            .header-bar { margin-bottom: 20px; gap: 10px;}
+            #room-title { margin-bottom: 25px; }
+
+            .text-btn { font-size: 22px; padding: 10px 30px; }
+            .icon-btn { width: 45px; height: 45px; font-size: 22px; border-width: 2px;}
+            .game-ctrl-btn { width: 45px; height: 45px; font-size: 20px; border-width: 2px;}
+            #controls { top: 10px; right: 10px; gap: 10px; }
+        }
+    </style>
+</head>
+<body>
+
+    <audio id="bgMusic" src="music.mp3" loop></audio>
+    <audio id="clickSound" src="click.mp3"></audio>
+    <audio id="correctSound" src="correct.mp3"></audio>
+    <audio id="errorSound" src="error.mp3"></audio>
+    <audio id="yaSound" src="ya.m4a"></audio> 
+
+    <div id="controls" class="hidden">
+        <div id="btnMusic" class="icon-btn icon-music" onclick="toggleMusic()" title="موسيقى">🔊</div>
+        <div id="btnHome" class="icon-btn icon-home" onclick="goHome()" title="الرئيسية">🏠</div>
+        <div id="btnSideRooms" class="icon-btn icon-rooms hidden" onclick="showRooms()" title="العودة للغرف">🚪</div>
+        <div id="btnBack" class="icon-btn icon-back" onclick="goBack()" title="عودة">🔙</div>
+    </div>
+
+    <div id="screen-home" class="screen active home-bg">
+        <button class="text-btn btn-primary" onclick="startGame()">انقر هنا</button>
+    </div>
+
+    <div id="screen-welcome" class="screen welcome-bg hidden">
+        <button class="text-btn btn-secondary" onclick="showRooms()">العب الآن</button>
+    </div>
+
+    <div id="screen-rooms" class="screen hidden">
+        <div class="bg-overlay"></div>
+        <div class="rooms-container"></div>
+    </div>
+
+    <div id="screen-activities" class="screen hidden" style="position: relative;">
+        <div id="activities-bg" class="bg-overlay"></div> 
+        <h2 id="room-title" class="title"></h2>
+        <div class="activities-container" id="activities-list"></div>
+    </div>
+
+    <div id="screen-game" class="screen hidden" style="position: relative;">
+        <div id="game-bg" class="bg-overlay"></div> 
+        
+        <div class="header-bar">
+            <div id="btnRetry" class="game-ctrl-btn icon-retry" onclick="retryActivity()" title="إعادة المحاولة">🔄</div>
+            <h2 id="activity-title" class="title" style="margin-bottom: 0;"></h2>
+            <div id="btnNext" class="game-ctrl-btn icon-next hidden" onclick="nextActivity()" title="التالي">⏭️</div>
+            <div id="btnEndRooms" class="game-ctrl-btn icon-rooms hidden" onclick="showRooms()" title="العودة للغرف">🚪</div>
+        </div>
+        
+        <div id="drop-zones" class="zones-container"></div>
+        <div id="scattered-images" class="images-container"></div>
+    </div>
+
+    <script>
+        let isMusicPlaying = true;
+        let historyStack = [];
+        
+        let currentRoomKey = null;
+        let currentActIndex = 0;
+        let currentActivity = null;
+        
+        let correctPlacements = 0;
+        let activeImg = null; 
+        let draggedSrc = null;
+
+        const bgMusic = document.getElementById('bgMusic');
+        const clickSound = document.getElementById('clickSound');
+        const correctSound = document.getElementById('correctSound');
+        const errorSound = document.getElementById('errorSound');
+        const yaSound = document.getElementById('yaSound'); // تعريف الصوت الجديد
+
+        // ================= قاعدة البيانات =================
+        const gameData = {
+            kitchen: {
+                id: 'kitchen', 
+                name: 'المطبخ', 
+                image: 'kichen.png', 
+                color: '#89CFF0', 
+                bgImage: 'kichen.png',
+                activities: [
+                    { name: 'اشرب الماء', finalImg: 'c.png', seq: ['a.png', 'b.png', 'c.png'], anyOrder: false },
+                    { name: 'امسح الطاولة', finalImg: 'f.png', seq: ['d.png', 'e.png', 'f.png'], anyOrder: false },
+                    { name: 'حضر الفطور', finalImg: 'l.png', seq: ['g.jpeg', 'h.jpeg', 'k.png', 'l.png'], anyOrder: false },
+                    { name: 'ضع الطعام في الثلاجة', finalImg: 'o.jpeg', seq: ['m.jpeg', 'n.jpeg', 'o.jpeg'], anyOrder: false },
+                    { name: 'اغسل الفواكهة', finalImg: 'r.png', seq: ['p.png', 'q.png', 'r.png'], anyOrder: false }
+                ]
+            },
+            bathroom: {
+                id: 'bathroom', name: 'الحمام', image: 'bath.png', color: '#FFB74D', bgImage: 'bath.png',
+                activities: [
+                    { name: 'استخدم المرحاض', finalImg: 'w.jpg', seq: ['s.jpg', 't.jpg', 'u.jpg', 'v.jpg', 'w.jpg'], anyOrder: false },
+                    { name: 'فرش أسنانك', finalImg: 'bb.png', seq: ['x.png', 'y.png', 'z.jpeg', 'aa.png', 'bb.png'], anyOrder: false },
+                    { name: 'غسل يديك', finalImg: 'ff.png', seq: ['cc.png', 'dd.png', 'dd.png', 'ff.png'], anyOrder: false },
+                    { name: 'استحم', finalImg: 'ii.jpeg', seq: ['gg.jpeg', 'hh.jpeg', 'ii.jpeg'], anyOrder: false }
+                ]
+            },
+            kidsRoom: {
+                id: 'kidsRoom', name: 'غرفة الأطفال', image: 'child.jpg', color: '#A5D6A7', bgImage: 'child.jpg',
+                activities: [
+                    { name: 'اذهب للنوم', finalImg: 'mm.png', seq: ['kk.png', 'll.png', 'mm.png'], anyOrder: false },
+                    { name: 'رتب سريرك', finalImg: 'oo.png', seq: ['nn.png', 'oo.png'], anyOrder: false },
+                    { name: 'البس قميصك', finalImg: 'rr.png', seq: ['pp.png', 'qq.png', 'rr.png'], anyOrder: false },
+                    { name: 'البس حذاءك', finalImg: 'vv.png', seq: ['ss.png', 'tt.png', 'uu.png', 'vv.png'], anyOrder: false },
+                    { name: 'رتب ألعابك', finalImg: 'xx.png', seq: ['ww.png', 'xx.png'], anyOrder: false }
+                ]
+            },
+            livingRoom: {
+                id: 'livingRoom', name: 'غرفة المعيشة', image: 'mash.png', color: '#FFF59D', bgImage: 'mash.png',
+                activities: [
+                    { name: 'رتب الوسادات', finalImg: 'bbb.png', seq: ['yy.png', 'zz.png', 'aaa.png', 'bbb.png'], anyOrder: false },
+                    { name: 'شاهد التلفاز', finalImg: 'eee.png', seq: ['ccc.png', 'ddd.png', 'eee.png'], anyOrder: false }
+                ]
+            },
+            garden: {
+                id: 'garden', name: 'الحديقة', image: 'garden.jpg', color: '#EF9A9A', bgImage: 'garden.jpg',
+                activities: [
+                    { name: 'اسقِ الأزهار', finalImg: 'ggg.png', seq: ['fff.png', 'ggg.png'], anyOrder: false },
+                    { name: 'العب بالحديقة', finalImg: 'iii.png', seq: ['hhh.png', 'iii.png', 'jjj.png'], anyOrder: true } 
+                ]
+            }
+        };
+
+        // ================= الأصوات =================
+        function playClick() { clickSound.currentTime = 0; clickSound.play(); }
+
+        function toggleMusic() {
+            playClick();
+            if (isMusicPlaying) {
+                bgMusic.pause();
+                document.getElementById('btnMusic').innerText = '🔇';
+                isMusicPlaying = false;
+            } else {
+                bgMusic.play();
+                document.getElementById('btnMusic').innerText = '🔊';
+                isMusicPlaying = true;
+            }
+        }
+
+        function playEffectSound(effectAudio) {
+            let wasPlaying = !bgMusic.paused && isMusicPlaying;
+            if (wasPlaying) bgMusic.pause(); 
+            
+            effectAudio.currentTime = 0;
+            effectAudio.play();
+            
+            effectAudio.onended = () => {
+                if (wasPlaying && isMusicPlaying) bgMusic.play();
+            };
+        }
+
+        // ================= التنقل الذكي =================
+        function switchScreen(screenId, saveHistory = true) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            
+            const target = document.getElementById(screenId);
+            target.classList.remove('hidden');
+            target.classList.add('active');
+
+            const controls = document.getElementById('controls');
+            const btnSideRooms = document.getElementById('btnSideRooms');
+
+            if(screenId === 'screen-home' || screenId === 'screen-welcome') {
+                controls.classList.add('hidden');
+            } else {
+                controls.classList.remove('hidden');
+            }
+
+            if(screenId === 'screen-activities' || screenId === 'screen-game') {
+                btnSideRooms.classList.remove('hidden');
+            } else {
+                btnSideRooms.classList.add('hidden');
+            }
+
+            if (saveHistory && screenId !== 'screen-home') historyStack.push(screenId);
+        }
+
+        function startGame() {
+            playClick();
+            if(isMusicPlaying) bgMusic.play(); 
+            switchScreen('screen-welcome');
+        }
+
+        function showRooms() {
+            playClick();
+            const container = document.querySelector('.rooms-container');
+            container.innerHTML = ''; 
+
+            for (const key in gameData) {
+                const room = gameData[key];
+                const roomHtml = `
+                    <div class="card" style="border-color:${room.color}" onclick="openRoom('${key}')">
+                        <img src="${room.image}" alt="${room.name}">
+                        <h3>${room.name}</h3>
+                    </div>
+                `;
+                container.innerHTML += roomHtml;
+            }
+            switchScreen('screen-rooms');
+        }
+
+        function openRoom(roomKey) {
+            playClick();
+            currentRoomKey = roomKey;
+            const room = gameData[roomKey];
+            
+            document.getElementById('screen-activities').style.backgroundColor = room.color;
+            document.getElementById('activities-bg').style.backgroundImage = `url('${room.bgImage}')`;
+            
+            document.getElementById('room-title').innerText = room.name;
+            
+            const container = document.getElementById('activities-list');
+            container.innerHTML = '';
+
+            room.activities.forEach((act, index) => {
+                const actHtml = `
+                    <div class="card" onclick="startActivity('${roomKey}', ${index})">
+                        <img src="${act.finalImg}" alt="${act.name}">
+                        <h3>${act.name}</h3>
+                    </div>
+                `;
+                container.innerHTML += actHtml;
+            });
+            switchScreen('screen-activities');
+        }
+
+        function goHome() {
+            playClick();
+            historyStack = [];
+            switchScreen('screen-home', false); 
+        }
+
+        function goBack() {
+            playClick();
+            if (historyStack.length > 1) {
+                historyStack.pop(); 
+                const prevScreen = historyStack.pop(); 
+                switchScreen(prevScreen);
+            } else {
+                goHome();
+            }
+        }
+
+        // ================= اللعبة والسحب =================
+        function startActivity(roomKey, actIndex) {
+            playClick();
+            currentRoomKey = roomKey;
+            currentActIndex = actIndex;
+            const room = gameData[roomKey];
+            currentActivity = room.activities[actIndex];
+            
+            document.getElementById('screen-game').style.backgroundColor = room.color;
+            document.getElementById('game-bg').style.backgroundImage = `url('${room.bgImage}')`;
+            
+            document.getElementById('activity-title').innerText = currentActivity.name;
+            
+            const btnNext = document.getElementById('btnNext');
+            const btnEndRooms = document.getElementById('btnEndRooms');
+            
+            if (actIndex < room.activities.length - 1) {
+                btnNext.classList.remove('hidden');
+                btnEndRooms.classList.add('hidden');
+            } else {
+                btnNext.classList.add('hidden');
+                btnEndRooms.classList.remove('hidden');
+            }
+
+            setupGame();
+            switchScreen('screen-game');
+        }
+
+        function nextActivity() {
+            playClick();
+            startActivity(currentRoomKey, currentActIndex + 1);
+        }
+
+        function setupGame() {
+            correctPlacements = 0;
+            activeImg = null;
+            draggedSrc = null;
+            
+            const dropZonesContainer = document.getElementById('drop-zones');
+            const imagesContainer = document.getElementById('scattered-images');
+            
+            dropZonesContainer.innerHTML = '';
+            imagesContainer.innerHTML = '';
+
+            currentActivity.seq.forEach((imgSrc, index) => {
+                const zone = document.createElement('div');
+                zone.className = 'drop-zone';
+                zone.innerText = index + 1; 
+                zone.dataset.index = index; 
+                
+                zone.addEventListener('dragover', (e) => e.preventDefault());
+                zone.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    handleDrop(zone, draggedSrc);
+                });
+
+                dropZonesContainer.appendChild(zone);
+            });
+
+            let shuffledImages = [...currentActivity.seq].sort(() => Math.random() - 0.5);
+            
+            shuffledImages.forEach(imgSrc => {
+                const img = document.createElement('img');
+                img.src = imgSrc;
+                img.className = 'draggable-img';
+                img.dataset.src = imgSrc;
+                img.draggable = true;
+                
+                img.addEventListener('dragstart', (e) => {
+                    activeImg = img;
+                    draggedSrc = imgSrc;
+                    e.dataTransfer.setData('text/plain', imgSrc);
+                });
+
+                img.addEventListener('touchstart', (e) => {
+                    activeImg = img;
+                    draggedSrc = imgSrc;
+                    img.style.opacity = '0.7';
+                }, {passive: false});
+
+                img.addEventListener('touchmove', (e) => {
+                    e.preventDefault(); 
+                    const touch = e.targetTouches[0];
+                    const offsetX = img.offsetWidth / 2;
+                    const offsetY = img.offsetHeight / 2;
+                    img.style.position = 'fixed';
+                    img.style.left = touch.pageX - offsetX + 'px';
+                    img.style.top = touch.pageY - offsetY + 'px';
+                    img.style.zIndex = '1000';
+                }, {passive: false});
+
+                img.addEventListener('touchend', (e) => {
+                    const touch = e.changedTouches[0];
+                    img.style.position = 'static';
+                    img.style.opacity = '1';
+                    img.style.zIndex = '1';
+                    
+                    img.style.display = 'none';
+                    const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY);
+                    img.style.display = 'block';
+
+                    if (elementBelow) {
+                        const targetZone = elementBelow.closest('.drop-zone');
+                        if (targetZone) {
+                            handleDrop(targetZone, draggedSrc);
+                        }
+                    }
+                });
+
+                imagesContainer.appendChild(img);
+            });
+        }
+
+        function handleDrop(zone, src) {
+            if (zone.querySelector('img')) return;
+
+            const zoneIndex = parseInt(zone.dataset.index);
+            const expectedImageSrc = currentActivity.seq[zoneIndex];
+
+            let isCorrect = false;
+            if (currentActivity.anyOrder) {
+                isCorrect = currentActivity.seq.includes(src);
+            } else {
+                isCorrect = (src === expectedImageSrc);
+            }
+
+            if (isCorrect) {
+                if (activeImg && activeImg.dataset.src === src) {
+                    zone.innerText = ''; 
+                    zone.appendChild(activeImg);
+                    
+                    activeImg.draggable = false;
+                    activeImg.style.position = 'static';
+                    activeImg.ontouchstart = null;
+                    activeImg.ontouchmove = null;
+                    activeImg.ontouchend = null;
+                    activeImg.classList.remove('draggable-img');
+                    
+                    correctPlacements++;
+                    
+                    // التعديل السحري هنا: التحقق إذا كان الطفل قد أنهى الترتيب بالكامل
+                    if (correctPlacements === currentActivity.seq.length) {
+                        zone.style.borderColor = '#4CAF50';
+                        playEffectSound(yaSound); // إطلاق صوت الاحتفال ya.m4a
+                    } else {
+                        playEffectSound(correctSound); // إطلاق صوت النجاح العادي للقطعة الواحدة
+                    }
+                }
+            } else {
+                playEffectSound(errorSound);
+                zone.style.backgroundColor = '#FFCDD2';
+                setTimeout(() => zone.style.backgroundColor = 'rgba(255,255,255,0.7)', 300);
+            }
+        }
+
+        function retryActivity() {
+            playClick();
+            setupGame();
+        }
+    </script>
+</body>
+</html>
