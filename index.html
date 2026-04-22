@@ -17,9 +17,6 @@
         .hidden { display: none !important; }
         .active { display: flex; }
 
-        /* === التنسيق القديم للشعار في المنتصف (تم تعطيله/حذفه) === */
-        /* .main-logo { max-width: 300px; height: auto; margin-bottom: 30px; } */
-
         .bg-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; opacity: 0.1; background-size: cover; background-position: center; z-index: -1; pointer-events: none; }
 
         #screen-rooms { position: relative; background-color: #ffffff; }
@@ -38,20 +35,20 @@
 
         /* تنسيق زر الشعار الدائري الجديد (بخلفية بيضاء) */
         .main-logo-btn { 
-            width: 80px; /* أكبر قليلاً من الأيقونات */
+            width: 80px; 
             height: 80px; 
-            border-radius: 50%; /* دائري */
-            background-color: white; /* خلفية بيضاء */
+            border-radius: 50%; 
+            background-color: white; 
             display: flex; align-items: center; justify-content: center; 
             box-shadow: 0 4px 10px rgba(0,0,0,0.3); 
-            border: 4px solid #eee; /* إطار خفيف جداً لتحديد الأبيض */
-            overflow: hidden; /* للحفاظ على الشكل الدائري للصورة بداخلها */
-            padding: 8px; /* مسافة بين الإطار والصورة */
+            border: 4px solid #eee; 
+            overflow: hidden; 
+            padding: 8px; 
             user-select: none;
         }
         .main-logo-btn img { 
             max-width: 100%; max-height: 100%; 
-            object-fit: contain; /* الحفاظ على أبعاد الشعار */
+            object-fit: contain; 
         }
 
         /* تنسيق أيقونات التحكم الأخرى */
@@ -71,20 +68,20 @@
         .title { background-color: rgba(255, 255, 255, 0.9); padding: 15px 40px; border-radius: 20px; border: 3px dashed #333; font-size: 36px; color: #333;}
         #room-title { margin-bottom: 30px; } 
 
-        .rooms-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 30px; max-width: 950px; margin: 0 auto; }
+        .rooms-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 30px; max-width: 950px; width: 100%; margin: 0 auto; }
         
-        /* === حاوية الأوامر الحفاظ على 3 جنب بعض === */
+        /* === حاوية الأوامر - تم إضافة width: 100% لإجبار الغرف ذات الأمرين على الحفاظ على نفس الحجم === */
         .activities-container { 
-            display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; max-width: 900px; margin: 0 auto; 
+            display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; max-width: 900px; width: 100%; margin: 0 auto; 
         }
         
-        /* === بطاقات الغرف (بوردير ريديوس) === */
+        /* === بطاقات الغرف === */
         .card { background-color: white; padding: 20px; border-radius: 20px; text-align: center; cursor: pointer; box-shadow: 0 4px 8px rgba(0,0,0,0.2); border: 6px solid white; transition: transform 0.3s; width: 280px; }
         .card:hover { transform: scale(1.05); }
         .card img { width: 100%; height: 200px; object-fit: contain; border-radius: 10px; pointer-events: none;} 
         .card h3 { margin-top: 15px; font-size: 28px; color: #333; }
 
-        /* === تنسيق أوامر الغرف للحاسوب (3 جنب بعض وبوردير ريديوس) === */
+        /* === تنسيق أوامر الغرف للحاسوب === */
         .activities-container .card { 
             width: calc(33.33% - 14px); min-width: 250px; 
             padding: 15px; border-width: 5px; border-radius: 15px; 
@@ -108,27 +105,21 @@
             /* تعديل موضع وحجم حاوية التحكم والشعار للجوال */
             #controls { top: 10px; right: 10px; gap: 10px; }
             
-            .main-logo-btn { 
-                width: 60px; /* أصغر للجوال */
-                height: 60px; 
-                padding: 6px; 
-                border-width: 3px; 
-            }
-
+            .main-logo-btn { width: 60px; height: 60px; padding: 6px; border-width: 3px; }
             .icon-btn { width: 50px; height: 50px; font-size: 24px; border-width: 3px;}
             .game-ctrl-btn { width: 50px; height: 50px; font-size: 24px; border-width: 3px;}
 
             .rooms-container { max-width: 380px; gap: 15px; }
             
-            /* حاوية الأوامر للجوال (الحفاظ على 3 جنب بعض) */
-            .activities-container { gap: 8px; padding: 0 5px; max-width: 100%; }
+            /* حاوية الأوامر للجوال (تم إضافة width: 100%) */
+            .activities-container { gap: 8px; padding: 0 5px; max-width: 100%; width: 100%; }
 
             /* حجم الغرف على الجوال */
             .card { width: 170px; padding: 15px; border-width: 4px; border-radius: 15px;}
             .card img { height: 130px; }
             .card h3 { font-size: 20px; margin-top: 12px; font-weight: bold;}
 
-            /* === تنسيق أوامر الغرف للجوال (3 جنب بعض وبوردير ريديوس) === */
+            /* === تنسيق أوامر الغرف للجوال === */
             .activities-container .card { 
                 width: calc(33.33% - 6px); min-width: 0; 
                 padding: 8px; border-width: 3px; border-radius: 10px;
@@ -201,7 +192,6 @@
     </div>
 
     <script>
-        // المتغيرات
         let musicEnabled = true; 
         let isPlayingContext = false; 
         
@@ -220,14 +210,9 @@
         const errorSound = document.getElementById('errorSound');
         const yaSound = document.getElementById('yaSound'); 
 
-        // ================= قاعدة البيانات =================
         const gameData = {
             kitchen: {
-                id: 'kitchen', 
-                name: 'المطبخ', 
-                image: 'kichen.png', 
-                color: '#89CFF0',
-                bgImage: 'kichen.png',
+                id: 'kitchen', name: 'المطبخ', image: 'kichen.png', color: '#89CFF0', bgImage: 'kichen.png',
                 activities: [
                     { name: 'اشرب الماء', finalImg: 'c.png', seq: ['a.png', 'b.png', 'c.png'], anyOrder: false },
                     { name: 'امسح الطاولة', finalImg: 'f.png', seq: ['d.png', 'e.png', 'f.png'], anyOrder: false },
@@ -271,7 +256,6 @@
             }
         };
 
-        // ================= الأصوات والموسيقى =================
         function playClick() { 
             clickSound.currentTime = 0; 
             clickSound.play().catch(()=>{}); 
@@ -305,7 +289,6 @@
             };
         }
 
-        // ================= التنقل =================
         function switchScreen(screenId, saveHistory = true) {
             document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -403,7 +386,6 @@
             }
         }
 
-        // ================= اللعبة ومحرك السحب الاحترافي =================
         function startActivity(roomKey, actIndex) {
             playClick();
             currentRoomKey = roomKey;
